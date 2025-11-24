@@ -1,170 +1,371 @@
 <!DOCTYPE html>
-
-<html>
+<html lang="en" dir="ltr">
   <head>
     <title>Protocol Documentation</title>
     <meta charset="UTF-8">
-    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Ubuntu:400,700,400italic"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <script>
+      (function() {
+        const savedTheme = localStorage.getItem('theme');
+        const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        const theme = savedTheme || systemTheme;
+        document.documentElement.setAttribute('data-theme', theme);
+      })();
+    </script>
+
     <style>
-      body {
-        width: 60em;
-        margin: 1em auto;
-        color: #222;
-        font-family: "Ubuntu", sans-serif;
-        padding-bottom: 4em;
+      :root {
+        /* LIGHT THEME (Default) */
+        --bg-body: #f8fafc;
+        --bg-paper: #ffffff;
+        --bg-hover: #f1f5f9;
+        --text-primary: #0f172a;
+        --text-secondary: #475569;
+        --brand-color: #3b82f6;
+        --brand-hover: #2563eb;
+        --border-color: #e2e8f0;
+        --code-color: #0f172a;
+        --link-color: #3b82f6;
+        --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        --toggle-bg: #e2e8f0;
+        --toggle-icon: #475569;
+        
+        /* Accents */
+        --accent-message: #0ea5e9;
+        --accent-enum: #f59e0b;
+        --accent-service: #10b981;
+        --accent-extension: #8b5cf6;
       }
 
+      [data-theme="dark"] {
+        /* DARK THEME Overrides */
+        --bg-body: #0f172a;       /* Deep Navy */
+        --bg-paper: #1e293b;      /* Slate */
+        --bg-hover: #334155;
+        --text-primary: #f8fafc;  /* White */
+        --text-secondary: #94a3b8;/* Muted Grey */
+        --brand-color: #60a5fa;   /* Lighter Blue */
+        --brand-hover: #93c5fd;
+        --border-color: #334155;
+        --code-color: #e2e8f0;
+        --link-color: #60a5fa;
+        --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+        --toggle-bg: #334155;
+        --toggle-icon: #f8fafc;
+      }
+
+      /* Base Variables */
+      :root {
+        --font-ui: 'Inter', system-ui, -apple-system, sans-serif;
+        --font-code: 'JetBrains Mono', monospace;
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: var(--bg-body);
+        color: var(--text-primary);
+        font-family: var(--font-ui);
+        line-height: 1.6;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        transition: background-color 0.3s ease, color 0.3s ease;
+      }
+
+      /* Main Container */
+      body > * {
+        width: 100%;
+        max-width: 1200px;
+        padding-left: 2rem;
+        padding-right: 2rem;
+      }
+
+      /* --- Typography --- */
+      h1, h2, h3, h4 { color: var(--text-primary); text-align: left; }
+
       h1 {
-        font-weight: normal;
-        border-bottom: 1px solid #aaa;
-        padding-bottom: 0.5ex;
+        font-size: 3rem;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        margin-top: 4rem;
+        margin-bottom: 2rem;
+        text-align: center;
+        background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
       }
 
       h2 {
-        border-bottom: 1px solid #aaa;
-        padding-bottom: 0.5ex;
-        margin: 1.5em 0;
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-top: 4rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 10px;
+        color: var(--brand-color);
       }
 
       h3 {
-        font-weight: normal;
-        border-bottom: 1px solid #aaa;
-        padding-bottom: 0.5ex;
+        font-size: 1.4rem;
+        font-weight: 600;
+        margin-top: 3rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-left: 1rem;
+        border-left: 4px solid var(--brand-color);
+        background: linear-gradient(90deg, var(--bg-hover) 0%, transparent 100%);
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+        border-radius: 0 8px 8px 0;
       }
 
       a {
+        color: var(--link-color);
         text-decoration: none;
-        color: #567e25;
+        font-weight: 500;
+        transition: all 0.2s;
+      }
+      a:hover { color: var(--brand-hover); }
+
+      p { color: var(--text-secondary); margin-bottom: 1rem; max-width: 80ch; }
+
+      /* --- Theme Toggle Button --- */
+      .theme-toggle-btn {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        border: 1px solid var(--border-color);
+        background: var(--bg-paper);
+        color: var(--text-primary);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: var(--shadow-sm);
+        transition: all 0.2s ease;
+        z-index: 1000;
       }
 
-      table {
-        width: 100%;
-        font-size: 80%;
-        border-collapse: collapse;
+      .theme-toggle-btn:hover {
+        transform: scale(1.1);
+        box-shadow: var(--shadow-lg);
+        background: var(--bg-hover);
       }
 
-      thead {
-        font-weight: 700;
-        background-color: #dcdcdc;
+      .theme-icon {
+        width: 20px;
+        height: 20px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
       }
 
-      tbody tr:nth-child(even) {
-        background-color: #fbfbfb;
+      /* --- "Cool" Table of Contents (Grid System) --- */
+      #toc-container { margin-bottom: 4rem; }
+      
+      #toc {
+        list-style: none;
+        padding: 0;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 1.5rem;
       }
 
-      td {
-        border: 1px solid #ccc;
-        padding: 0.5ex 2ex;
+      /* TOC Card */
+      #toc > li {
+        background: var(--bg-paper);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+        box-shadow: var(--shadow-sm);
+        display: flex;
+        flex-direction: column;
       }
 
-      td p {
-        text-indent: 1em;
-        margin: 0;
+      #toc > li:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+        border-color: var(--brand-color);
       }
 
-      td p:nth-child(1) {
-        text-indent: 0; /* No indent on first p in td */
-      }
-
-      /* Table of fields */
-      .field-table td:nth-child(1) { /* Field */
-        width: 10em;
-      }
-      .field-table td:nth-child(2) { /* Type */
-        width: 10em;
-      }
-      .field-table td:nth-child(3) { /* Label */
-        width: 6em;
-      }
-      .field-table td:nth-child(4) { /* Description */
-        width: auto;
-      }
-
-      /* Table of extensions */
-      .extension-table td:nth-child(1) { /* Extension */
-        width: 10em;
-      }
-      .extension-table td:nth-child(2) { /* Type */
-        width: 10em;
-      }
-      .extension-table td:nth-child(3) { /* Base */
-        width: 10em;
-      }
-      .extension-table td:nth-child(4) { /* Number */
-        width: 5em;
-      }
-      .extension-table td:nth-child(5) { /* Description */
-        width: auto;
-      }
-
-      /* Table of enum values. */
-      .enum-table td:nth-child(1) { /* Name */
-        width: 10em;
-      }
-      .enum-table td:nth-child(2) { /* Number */
-        width: 10em;
-      }
-      .enum-table td:nth-child(3) { /* Description */
-        width: auto;
-      }
-
-      /* Table of scalar value types. */
-      .scalar-value-types-table tr {
-        height: 3em;
-      }
-
-      /* Table of contents. */
-      #toc-container ul {
-        list-style-type: none;
-        padding-left: 1em;
-        line-height: 180%;
-        margin: 0;
-      }
+      /* File Name in TOC */
       #toc > li > a {
-        font-weight: bold;
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 0.5rem;
+        display: block;
+      }
+      
+      #toc > li > a:hover { color: var(--brand-color); border-color: var(--brand-color); }
+
+      #toc ul { list-style: none; padding-left: 0; margin: 0; flex-grow: 1; }
+      #toc ul li { margin-bottom: 6px; }
+
+      #toc ul li a {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        display: flex;
+        align-items: center;
+        padding: 4px 8px;
+        border-radius: 6px;
       }
 
-      /* File heading div */
-      .file-heading {
-        width: 100%;
-        display: table;
-        border-bottom: 1px solid #aaa;
-        margin: 4em 0 1.5em 0;
-      }
-      .file-heading h2 {
-        border: none;
-        display: table-cell;
-      }
-      .file-heading a {
-        text-align: right;
-        display: table-cell;
+      #toc ul li a:hover {
+        background-color: var(--bg-hover);
+        color: var(--text-primary);
+        transform: translateX(4px);
       }
 
-      /* The 'M', 'E' and 'X' badges in the ToC */
+      /* --- Badges --- */
       .badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
         width: 1.6em;
         height: 1.6em;
-        display: inline-block;
+        border-radius: 6px;
+        font-size: 0.7em;
+        font-weight: 800;
+        margin-right: 10px;
+        color: white;
+        text-transform: uppercase;
+        font-family: var(--font-code);
+      }
 
-        line-height: 1.6em;
-        text-align: center;
-        font-weight: bold;
-        font-size: 60%;
+      a:has(.badge:contains("M")) .badge, .badge:contains("M") { background: linear-gradient(135deg, #0ea5e9, #0284c7); }
+      a:has(.badge:contains("E")) .badge, .badge:contains("E") { background: linear-gradient(135deg, #f59e0b, #d97706); }
+      a:has(.badge:contains("S")) .badge, .badge:contains("S") { background: linear-gradient(135deg, #10b981, #059669); }
+      a:has(.badge:contains("X")) .badge, .badge:contains("X") { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
 
-        color: #89ba48;
-        background-color: #dff0c8;
+      /* --- Tables --- */
+      table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        margin: 1.5rem 0 3rem 0;
+        background: var(--bg-paper);
+        border-radius: 8px;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+        transition: background-color 0.3s, border-color 0.3s;
+      }
 
-        margin: 0.5ex 1em 0.5ex -1em;
-        border: 1px solid #fbfbfb;
-        border-radius: 1ex;
+      thead { background-color: var(--bg-hover); }
+
+      thead td {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-weight: 700;
+        color: var(--text-secondary);
+        padding: 12px 24px;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      tbody tr { transition: background-color 0.15s; }
+      tbody tr:not(:last-child) td { border-bottom: 1px solid var(--border-color); }
+      tbody tr:hover { background-color: var(--bg-hover); }
+
+      td {
+        padding: 16px 24px;
+        font-size: 0.95rem;
+        vertical-align: top;
+        color: var(--text-secondary);
+      }
+
+      /* Code styled text */
+      .field-table td:nth-child(1), .field-table td:nth-child(2),
+      .extension-table td:nth-child(1), .enum-table td:nth-child(2) {
+        font-family: var(--font-code);
+        font-size: 0.9em;
+      }
+
+      .field-table td:nth-child(1) { color: var(--text-primary); font-weight: 600; }
+      .field-table td:nth-child(2) a { color: var(--accent-extension); }
+
+      /* --- Top Button --- */
+      .top-link {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--text-secondary);
+        background: var(--bg-paper);
+        padding: 4px 12px;
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        opacity: 0.7;
+        margin-right: 10px;
+        font-family: var(--font-ui);
+      }
+      
+      .top-link:hover {
+        opacity: 1;
+        background: var(--brand-color);
+        color: white;
+        border-color: var(--brand-color);
+        box-shadow: 0 2px 5px rgba(37, 99, 235, 0.3);
+        text-decoration: none;
+      }
+
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      body { animation: fadeIn 0.5s ease-out; }
+
+      @media (max-width: 800px) {
+        table { display: block; overflow-x: auto; white-space: nowrap; }
+        #toc { grid-template-columns: 1fr; }
+        .theme-toggle-btn { top: 10px; right: 10px; width: 36px; height: 36px; }
       }
     </style>
 
-    <!-- User custom CSS -->
     <link rel="stylesheet" type="text/css" href="stylesheet.css"/>
   </head>
 
   <body>
+
+    <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle Dark Mode">
+        <svg id="icon-sun" class="theme-icon" viewBox="0 0 24 24" style="display: none;">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+        <svg id="icon-moon" class="theme-icon" viewBox="0 0 24 24" style="display: none;">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+    </button>
 
     <h1 id="title">Protocol Documentation</h1>
 
@@ -200,19 +401,21 @@
             </ul>
           </li>
         {{end}}
-        <li><a href="#scalar-value-types">Scalar Value Types</a></li>
       </ul>
     </div>
 
     {{range .Files}}
       {{$file_name := .Name}}
       <div class="file-heading">
-        <h2 id="{{.Name}}">{{.Name}}</h2><a href="#title">Top</a>
+        <h2 id="{{.Name}}">{{.Name}} <a href="#title" class="top-link">↑ Top</a></h2>
       </div>
       {{p .Description}}
 
       {{range .Messages}}
-        <h3 id="{{.FullName}}">{{.LongName}}</h3>
+        <h3 id="{{.FullName}}">
+            {{.LongName}}
+            <a href="#title" class="top-link">↑ Top</a>
+        </h3>
         {{p .Description}}
 
         {{if .HasFields}}
@@ -303,7 +506,10 @@
       {{end}}
 
       {{range .Enums}}
-        <h3 id="{{.FullName}}">{{.LongName}}</h3>
+        <h3 id="{{.FullName}}">
+            {{.LongName}}
+            <a href="#title" class="top-link">↑ Top</a>
+        </h3>
         {{p .Description}}
         <table class="enum-table">
           <thead>
@@ -322,7 +528,10 @@
       {{end}}
 
       {{if .HasExtensions}}
-        <h3 id="{{$file_name}}-extensions">File-level Extensions</h3>
+        <h3 id="{{$file_name}}-extensions">
+            File-level Extensions
+            <a href="#title" class="top-link">↑ Top</a>
+        </h3>
         <table class="extension-table">
           <thead>
             <tr><td>Extension</td><td>Type</td><td>Base</td><td>Number</td><td>Description</td></tr>
@@ -342,7 +551,10 @@
       {{end}}
 
       {{range .Services}}
-        <h3 id="{{.FullName}}">{{.Name}}</h3>
+        <h3 id="{{.FullName}}">
+            {{.Name}}
+            <a href="#title" class="top-link">↑ Top</a>
+        </h3>
         {{p .Description}}
         <table class="enum-table">
           <thead>
@@ -411,27 +623,33 @@
       {{end}}
     {{end}}
 
-    <h2 id="scalar-value-types">Scalar Value Types</h2>
-    <table class="scalar-value-types-table">
-      <thead>
-        <tr><td>.proto Type</td><td>Notes</td><td>C++</td><td>Java</td><td>Python</td><td>Go</td><td>C#</td><td>PHP</td><td>Ruby</td></tr>
-      </thead>
-      <tbody>
-        {{range .Scalars}}
-          <tr id="{{.ProtoType}}">
-            <td>{{.ProtoType}}</td>
-            <td>{{.Notes}}</td>
-            <td>{{.CppType}}</td>
-            <td>{{.JavaType}}</td>
-            <td>{{.PythonType}}</td>
-            <td>{{.GoType}}</td>
-            <td>{{.CSharp}}</td>
-            <td>{{.PhpType}}</td>
-            <td>{{.RubyType}}</td>
-          </tr>
-        {{end}}
-      </tbody>
-    </table>
+    <script>
+      const toggleBtn = document.getElementById('theme-toggle');
+      const sunIcon = document.getElementById('icon-sun');
+      const moonIcon = document.getElementById('icon-moon');
+      const htmlEl = document.documentElement;
+
+      function updateIcons(theme) {
+        if (theme === 'dark') {
+          sunIcon.style.display = 'block';
+          moonIcon.style.display = 'none';
+        } else {
+          sunIcon.style.display = 'none';
+          moonIcon.style.display = 'block';
+        }
+      }
+
+      // Initial icon state
+      updateIcons(htmlEl.getAttribute('data-theme'));
+
+      toggleBtn.addEventListener('click', () => {
+        const currentTheme = htmlEl.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        
+        htmlEl.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        updateIcons(newTheme);
+      });
+    </script>
   </body>
 </html>
-
