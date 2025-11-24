@@ -225,7 +225,7 @@
                 <tr>
                   <td>{{.Name}}</td>
                   <td><a href="#{{.FullType}}">{{.LongType}}</a></td>
-                  <td>{{.Label}}</td>
+                  <td>{{if .IsOneof}}oneof {{.OneofDecl}}{{else}}{{.Label}}{{end}}</td>
                   <td><p>{{if (index .Options "deprecated"|default false)}}<strong>Deprecated.</strong> {{end}}{{.Description}} {{if .DefaultValue}}Default: {{.DefaultValue}}{{end}}</p></td>
                 </tr>
               {{end}}
@@ -235,7 +235,7 @@
           {{$message := .}}
           {{- range .FieldOptions}}
             {{$option := .}}
-            {{if eq . "validator.field" "validate.rules" }}
+            {{if or (eq . "validator.field") (eq . "validate.rules") (eq . "nanopb_validate.rules") }}
             <h4>Validated Fields</h4>
             <table>
               <thead>

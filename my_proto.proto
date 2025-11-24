@@ -1,0 +1,97 @@
+syntax = "proto3";
+
+package demo;
+
+import "validate.proto"; // provides (nanopb_validate.rules) extension
+
+// Table of contents
+// - message ChatMessage  (demo_multi/messages/chat.proto:26-38)
+// - message ColoredPoint  (demo_multi/structures/geometry.proto:11-15)
+// - message Point  (demo_multi/structures/geometry.proto:5-10)
+// - message User  (demo_multi/messages/chat.proto:17-25)
+// - enum Color  (demo_multi/enums/colors.proto:3-10)
+
+// begin: message ChatMessage (demo_multi/messages/chat.proto:26-38)
+
+message ChatMessage {
+  User from = 1;
+  User to = 2;
+  string text = 3 [
+    (nanopb_validate.rules).string.min_len = 1,
+    (nanopb_validate.rules).string.max_len = 256
+  ];
+  ColoredPoint location = 4; // where it was sent from
+  Color theme = 5 [(nanopb_validate.rules).enum.defined_only = true];
+}
+
+// end: message ChatMessage
+// begin: message ColoredPoint (demo_multi/structures/geometry.proto:11-15)
+
+message ColoredPoint {
+  Point p = 1;
+  Color color = 2 [(nanopb_validate.rules).enum.defined_only = true];
+}
+
+// end: message ColoredPoint
+// begin: message Point (demo_multi/structures/geometry.proto:5-10)
+
+message Point {
+  float x = 1 [(nanopb_validate.rules).float.gte = -1000.0, (nanopb_validate.rules).float.lte = 1000.0];
+  float y = 2 [(nanopb_validate.rules).float.gte = -1000.0, (nanopb_validate.rules).float.lte = 1000.0];
+}
+
+// end: message Point
+// begin: message User (demo_multi/messages/chat.proto:17-25)
+
+
+message User {
+  string id = 1 [(nanopb_validate.rules).string.min_len = 1, (nanopb_validate.rules).string.max_len = 36];
+  string name = 2 [(nanopb_validate.rules).string.min_len = 1, (nanopb_validate.rules).string.max_len = 50];
+}
+
+// end: message User
+// begin: enum Color (demo_multi/enums/colors.proto:3-10)
+
+// Simple enum used by other messages
+enum Color {
+  COLOR_UNSPECIFIED = 0;
+  RED = 1;
+  GREEN = 2;
+  BLUE = 3;
+}
+
+// end: enum Color
+
+// begin: message AdvancedExample (added for oneof and nested validations)
+
+message AdvancedExample {
+  // oneof with different validated field types
+  oneof target {
+    string email = 1 [(nanopb_validate.rules).string.email = true, (nanopb_validate.rules).string.max_len = 255];
+    int32 age = 2 [(nanopb_validate.rules).int32.gte = 0, (nanopb_validate.rules).int32.lte = 150];
+    bytes raw = 3 [(nanopb_validate.rules).bytes.min_len = 4, (nanopb_validate.rules).bytes.max_len = 1024];
+  }
+
+  // Nested submessage with its own constraints
+  message Sub {
+    string id = 1 [(nanopb_validate.rules).string.min_len = 3, (nanopb_validate.rules).string.max_len = 64];
+    repeated string tags = 2 [
+      (nanopb_validate.rules).repeated.min_items = 1,
+      (nanopb_validate.rules).repeated.max_items = 10,
+      (nanopb_validate.rules).repeated.unique = true
+    ];
+    map<string,string> metadata = 3 [
+      (nanopb_validate.rules).map.min_pairs = 1,
+      (nanopb_validate.rules).map.max_pairs = 20
+    ];
+    float score = 4 [
+      (nanopb_validate.rules).float.gte = 0.0,
+      (nanopb_validate.rules).float.lte = 100.0
+    ];
+  }
+
+  Sub details = 10; // validated via nested fields
+  Color favorite = 11 [(nanopb_validate.rules).enum.defined_only = true];
+}
+
+// end: message AdvancedExample

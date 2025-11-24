@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+package demo2;
+
+import "my_proto.proto"; // provides demo.ChatMessage, demo.User, demo.AdvancedExample, etc
+import "validate.proto"; // brings in (nanopb_validate.rules) option extensions
+
+// File-level documentation for demo2 package.
+// This file demonstrates aggregating and re-exporting (by reference) messages
+// from the imported `demo` package defined in `my_proto.proto`.
+
+// Doc collects basic referenced messages with minimum length validation.
+message Doc {
+  // A non-empty list of chat messages.
+  repeated demo.ChatMessage messages = 1 [
+    (nanopb_validate.rules).repeated.min_items = 1
+  ];
+  // A non-empty list of users.
+  repeated demo.User users = 2 [
+    (nanopb_validate.rules).repeated.min_items = 1
+  ];
+}
+
+// ChatSummary provides a concise pairing of author, last message and a count.
+message ChatSummary {
+  demo.User author = 1; // author of the last message
+  demo.ChatMessage last_message = 2; // most recent message from author
+  uint32 message_count = 3; // total messages authored
+}
+
+// AdvancedWrapper references the more complex AdvancedExample message to show
+// nested structures and validation usage from the imported file.
+message AdvancedWrapper {
+  demo.AdvancedExample example = 1; // single advanced example
+  // Require at least one element in the collection of advanced examples.
+  repeated demo.AdvancedExample examples = 2 [
+    (nanopb_validate.rules).repeated.min_items = 1
+  ];
+}
+
+// DocAggregate groups summaries and raw referenced messages for higher-level docs.
+message DocAggregate {
+  repeated ChatSummary summaries = 1 [
+    (nanopb_validate.rules).repeated.min_items = 1
+  ];
+  repeated demo.ChatMessage all_messages = 2;
+  repeated demo.User all_users = 3;
+  // Include complex examples for richer documentation.
+  repeated demo.AdvancedExample advanced_examples = 4;
+}

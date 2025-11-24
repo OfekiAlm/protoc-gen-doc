@@ -5,7 +5,8 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/envoyproxy/protoc-gen-validate/validate"
+	envoyvalidate "github.com/envoyproxy/protoc-gen-validate/validate"
+	nanopbvalidate "github.com/pseudomuto/protoc-gen-doc/validate"
 	"github.com/pseudomuto/protoc-gen-doc/extensions"
 )
 
@@ -16,8 +17,10 @@ type ValidateRule struct {
 }
 
 // ValidateExtension contains the rules set by the (validate.rules) method option extension.
+// ValidateExtension contains the rules set by the (validate.rules) method option extension for
+// envoyproxy/protoc-gen-validate.
 type ValidateExtension struct {
-	*validate.FieldRules
+	*envoyvalidate.FieldRules
 	rules []ValidateRule // memoized so that we don't have to use reflection more than we need.
 }
 
@@ -26,6 +29,25 @@ func (v ValidateExtension) MarshalJSON() ([]byte, error) { return json.Marshal(v
 
 // Rules returns the set of rules for this extension.
 func (v ValidateExtension) Rules() []ValidateRule {
+	if v.FieldRules == nil {
+		return nil
+	}
+	if v.rules == nil {
+		v.rules = flattenRules("", reflect.ValueOf(v.FieldRules))
+	}
+	return v.rules
+}
+
+// NanopbValidateExtension contains the rules for the custom nanopb validate.proto integration.
+type NanopbValidateExtension struct {
+	*nanopbvalidate.FieldRules
+	rules []ValidateRule
+}
+
+// MarshalJSON implements json.Marshaler.
+func (v NanopbValidateExtension) MarshalJSON() ([]byte, error) { return json.Marshal(v.Rules()) }
+
+func (v NanopbValidateExtension) Rules() []ValidateRule {
 	if v.FieldRules == nil {
 		return nil
 	}
@@ -81,11 +103,21 @@ func flattenRules(prefix string, vv reflect.Value) (rules []ValidateRule) {
 }
 
 func init() {
+	// Original envoy extension
 	extensions.SetTransformer("validate.rules", func(payload interface{}) interface{} {
-		rules, ok := payload.(*validate.FieldRules)
+		rules, ok := payload.(*envoyvalidate.FieldRules)
 		if !ok {
 			return nil
 		}
 		return ValidateExtension{FieldRules: rules}
+	})
+
+	// Custom nanopb extension
+	extensions.SetTransformer("nanopb_validate.rules", func(payload interface{}) interface{} {
+		rules, ok := payload.(*nanopbvalidate.FieldRules)
+		if !ok {
+			return nil
+		}
+		return NanopbValidateExtension{FieldRules: rules}
 	})
 }

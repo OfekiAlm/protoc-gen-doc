@@ -41,8 +41,32 @@
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 {{range .Fields -}}
-  | {{.Name}} | [{{.LongType}}](#{{.FullType | anchor}}) | {{.Label}} | {{if (index .Options "deprecated"|default false)}}**Deprecated.** {{end}}{{nobr .Description}}{{if .DefaultValue}} Default: {{.DefaultValue}}{{end}} |
+  | {{.Name}} | [{{.LongType}}](#{{.FullType | anchor}}) | {{if .IsOneof}}oneof {{.OneofDecl}}{{else}}{{.Label}}{{end}} | {{if (index .Options "deprecated"|default false)}}**Deprecated.** {{end}}{{nobr .Description}}{{if .DefaultValue}} Default: {{.DefaultValue}}{{end}} |
 {{end}}
+
+{{$message := .}}
+{{- range .FieldOptions}}
+{{$option := .}}
+{{if or (eq . "validator.field") (eq . "validate.rules") (eq . "nanopb_validate.rules") }}
+
+#### Validated Fields
+
+| Field | Validations |
+| ----- | ----------- |
+{{range $message.FieldsWithOption . -}}
+  | {{.Name}} | {{range (.Option $option).Rules}}{{.Name}}: {{.Value}}<br>{{end}} |
+{{end}}
+{{else}}
+
+#### Fields with {{.}} option
+
+| Name | Option |
+| ---- | ------ |
+{{range $message.FieldsWithOption . -}}
+  | {{.Name}} | {{ printf "%+v" (.Option $option)}} |
+{{end}}
+{{end}}
+{{end -}}
 {{end}}
 
 {{if .HasExtensions}}
